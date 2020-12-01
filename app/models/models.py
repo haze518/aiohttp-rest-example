@@ -28,3 +28,4 @@ class TransactionHistory(Base):
     currency = Column(String, nullable=False)
     country = Column(String, nullable=False)
     limits_id = Column(Integer, ForeignKey('limits.id', ondelete='CASCADE'))
+ 

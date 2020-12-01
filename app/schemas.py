@@ -8,7 +8,7 @@ from marshmallow.validate import Length
 class Base(Schema):
     class Meta:
         ordered = True
-        
+
 
 class PostLimitsRequestSchema(Base):
     client_id = fields.Int(required=True)
@@ -53,14 +53,14 @@ class LimitsResponseSchema(Base):
     max_transfer = fields.Int(required=True)
 
 
+class TransactionRequestSchema(Base):
+    id_limit = fields.Int(required=True)
+    amount = fields.Int(required=True)
 
-# class TransactionRequestSchema(Schema):
-#     client_id = fields.Int()
 
-
-# class TransactionResponseSchema(Schema):
-#     client_id = fields.Int()
-#     date = fields.Date()
-#     amount = fields.Int()
-#     currency = fields.Str()
-#     country = fields.Str()
+class TransactionResponseSchema(Base):
+    client_id = fields.Int(required=True)
+    date = fields.Date(required=True)
+    amount = fields.Int(required=True)
+    currency = fields.Str(required=True)
+    country = fields.Str(required=True)

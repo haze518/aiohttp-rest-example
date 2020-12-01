@@ -1,8 +1,8 @@
 from aiohttp import web
+from http import HTTPStatus
 from aiohttp_apispec import (request_schema,
                              docs,
                              response_schema)
-from http import HTTPStatus
 
 from app.schemas import (LimitsResponseSchema,
                          PostLimitsRequestSchema,
