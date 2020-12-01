@@ -1,82 +1,82 @@
 from aiohttp import web
-from aiohttp.web_response import Response
 from aiohttp_apispec import (request_schema,
                              docs,
                              response_schema)
-from sqlalchemy import select, insert
 from http import HTTPStatus
-import json
 
-from app.models.db import database
-from app.models.models import Limits
 from app.schemas import (LimitsResponseSchema,
-                         LimitsRequestSchema,
-                         PostLimitsRequestSchema)
+                         PostLimitsRequestSchema,
+                         PostLimitsReponseSchema,
+                         PutLimitsRequestSchema,
+                         PutLimitsResponseSchema,
+                         DeleteLimitsResponseSchema)
+from app.utils.limits import (select_limits_all,
+                              select_limits_client,
+                              check_id,
+                              check_data_limits,
+                              create_new_limit,
+                              update_limit,
+                              delete_limit_by_id)
 
 
 @docs(tags=['Limits'],
-      summary='Возвратить все данные с таблицы по лимитам')
+      summary='Возвратить все данные')
 @response_schema(LimitsResponseSchema, code=HTTPStatus.OK.value)
 async def limits_list(request):
-    query = (
-        select([
-            Limits.client_id,
-            Limits.country,
-            Limits.currency,
-            Limits.max_transfer
-        ])
-        .select_from(Limits)
-    )
-    rows = await database.fetch_all(query)
+    rows = await select_limits_all()
     schema = LimitsResponseSchema(many=True)
     limit_json = schema.dump(rows)
     return web.json_response(limit_json)
 
 
 @docs(tags=['Limits'],
-      summary='Возвратить данные по лимитам, по id клиенту')
+      summary='Возвратить данные по id клиенту')
 @response_schema(LimitsResponseSchema, code=HTTPStatus.OK.value)
 async def limits_client(request):
-    data = int(request.match_info.get('client_id'))
-    query = (
-        select([
-            Limits.client_id,
-            Limits.country,
-            Limits.currency,
-            Limits.max_transfer
-        ])
-        .select_from(Limits)
-        .where(Limits.client_id == data)
-    )
-    rows = await database.fetch_all(query)
-    if not len(rows):
+    id_ = int(request.match_info.get('id'))
+    rows = await select_limits_client(id_)
+    if rows is None:
         raise web.HTTPNotFound()
-    schema = LimitsResponseSchema(many=True)
+    schema = LimitsResponseSchema()
     limit_json = schema.dump(rows)
     return web.json_response(limit_json)
 
 
 @docs(tags=['Limits'],
-      summary='Отправить данные по лимитам')
+      summary='Отправить данные')
 @request_schema(PostLimitsRequestSchema, location='query')
-@response_schema(LimitsResponseSchema, code=HTTPStatus.CREATED.value)
+@response_schema(PostLimitsReponseSchema, code=HTTPStatus.CREATED.value)
 async def create_limit(request):
     data = request['data']
-    query = (
-        insert(Limits)
-        .values(
-            client_id=data['client_id'],
-            country=data['country'],
-            currency=data['currency'],
-            max_transfer=data['max_transfer']
-        )
-        .returning(
-            Limits.client_id,
-            Limits.currency,
-            Limits.country,
-            Limits.max_transfer
-        )
-    )
-    post = await database.fetch_one(query)
+    result = await check_data_limits(data)
+    if result is not None:
+        raise web.HTTPBadRequest()
+    post = await create_new_limit(data)
     post = dict(zip(post, post.values()))
     return web.json_response(post)
+
+
+@docs(tags=['Limits'],
+      summary='Изменить существующую запись')
+@request_schema(PutLimitsRequestSchema, location='query')
+@response_schema(PutLimitsResponseSchema, code=HTTPStatus.OK.value)
+async def change_limit(request):
+    data = request['data']
+    result = await check_id(data['id'])
+    if result is None:
+        raise web.HTTPNotFound()
+    post = await update_limit(data)
+    post = dict(zip(post, post.values()))
+    return web.json_response(post)
+
+
+@docs(tags=['Limits'],
+      summary='Удалить запись по id')
+@response_schema(DeleteLimitsResponseSchema, code=HTTPStatus.NO_CONTENT.value)
+async def delete_limit(request):
+    id_ = int(request.match_info.get('id'))
+    result = await check_id(id_)
+    if result is None:
+        raise web.HTTPNotFound()
+    await delete_limit_by_id(id_)
+    return web.json_response({'message': 'Запись успешно удалена'})

@@ -11,8 +11,6 @@ from app.models.db import database
 async def create_app():
     app = web.Application()
     setup_routes(app)
-    # In-memory toy-database:
-    app["users"] = []
     app.on_startup.append(startup)
     app.on_shutdown.append(shutdown)
     setup_aiohttp_apispec(app, swagger_path="/docs")
