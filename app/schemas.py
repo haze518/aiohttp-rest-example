@@ -54,7 +54,7 @@ class LimitsResponseSchema(Base):
 
 
 class TransactionRequestSchema(Base):
-    id_limit = fields.Int(required=True)
+    limit_id = fields.Int(required=True)
     amount = fields.Int(required=True)
 
 

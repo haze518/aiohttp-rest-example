@@ -4,26 +4,27 @@ from aiohttp_apispec import (request_schema,
                              docs,
                              response_schema)
 
+from app.models.models import Limits
 from app.schemas import (LimitsResponseSchema,
                          PostLimitsRequestSchema,
                          PostLimitsReponseSchema,
                          PutLimitsRequestSchema,
                          PutLimitsResponseSchema,
                          DeleteLimitsResponseSchema)
-from app.utils.limits import (select_limits_all,
-                              select_limits_client,
-                              check_id,
-                              check_data_limits,
-                              create_new_limit,
-                              update_limit,
-                              delete_limit_by_id)
+from app.utils import (select_all,
+                       check_data_exists,
+                       create_new_object,
+                       update_existing_object,
+                       delete_existing_object,
+                       unpack_object_data,
+                       check_not_found)
 
 
 @docs(tags=['Limits'],
       summary='Возвратить все данные')
 @response_schema(LimitsResponseSchema, code=HTTPStatus.OK.value)
 async def limits_list(request):
-    rows = await select_limits_all()
+    rows = await select_all(Limits)
     schema = LimitsResponseSchema(many=True)
     limit_json = schema.dump(rows)
     return web.json_response(limit_json)
@@ -34,11 +35,9 @@ async def limits_list(request):
 @response_schema(LimitsResponseSchema, code=HTTPStatus.OK.value)
 async def limits_client(request):
     id_ = int(request.match_info.get('id'))
-    rows = await select_limits_client(id_)
-    if rows is None:
-        raise web.HTTPNotFound()
+    result = await check_not_found(Limits, id_)
     schema = LimitsResponseSchema()
-    limit_json = schema.dump(rows)
+    limit_json = schema.dump(result)
     return web.json_response(limit_json)
 
 
@@ -48,11 +47,11 @@ async def limits_client(request):
 @response_schema(PostLimitsReponseSchema, code=HTTPStatus.CREATED.value)
 async def create_limit(request):
     data = request['data']
-    result = await check_data_limits(data)
+    result = await check_data_exists(Limits, data)
     if result is not None:
         raise web.HTTPBadRequest()
-    post = await create_new_limit(data)
-    post = dict(zip(post, post.values()))
+    post = await create_new_object(Limits, data)
+    post = unpack_object_data(post)
     return web.json_response(post)
 
 
@@ -62,11 +61,9 @@ async def create_limit(request):
 @response_schema(PutLimitsResponseSchema, code=HTTPStatus.OK.value)
 async def change_limit(request):
     data = request['data']
-    result = await check_id(data['id'])
-    if result is None:
-        raise web.HTTPNotFound()
-    post = await update_limit(data)
-    post = dict(zip(post, post.values()))
+    await check_not_found(Limits, data['id'])
+    post = await update_existing_object(Limits, data)
+    post = unpack_object_data(post)
     return web.json_response(post)
 
 
@@ -75,8 +72,6 @@ async def change_limit(request):
 @response_schema(DeleteLimitsResponseSchema, code=HTTPStatus.NO_CONTENT.value)
 async def delete_limit(request):
     id_ = int(request.match_info.get('id'))
-    result = await check_id(id_)
-    if result is None:
-        raise web.HTTPNotFound()
-    await delete_limit_by_id(id_)
+    await check_not_found(Limits, id_)
+    await delete_existing_object(Limits, id_)
     return web.json_response({'message': 'Запись успешно удалена'})
