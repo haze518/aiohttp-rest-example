@@ -19,6 +19,11 @@ from app.utils import (select_all,
                        unpack_object_data,
                        check_not_found)
 
+"""
+Тесты на POST не проходят под location='query'?
+пришлось убрать это
+"""
+
 
 @docs(tags=['Limits'],
       summary='Возвратить все данные')
@@ -43,7 +48,7 @@ async def limits_client(request):
 
 @docs(tags=['Limits'],
       summary='Отправить данные')
-@request_schema(PostLimitsRequestSchema, location='query')
+@request_schema(PostLimitsRequestSchema)
 @response_schema(PostLimitsReponseSchema, code=HTTPStatus.CREATED.value)
 async def create_limit(request):
     data = request['data']
@@ -57,7 +62,7 @@ async def create_limit(request):
 
 @docs(tags=['Limits'],
       summary='Изменить существующую запись')
-@request_schema(PutLimitsRequestSchema, location='query')
+@request_schema(PutLimitsRequestSchema)
 @response_schema(PutLimitsResponseSchema, code=HTTPStatus.OK.value)
 async def change_limit(request):
     data = request['data']

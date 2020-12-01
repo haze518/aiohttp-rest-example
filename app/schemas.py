@@ -2,7 +2,7 @@
 Модуль содержит схемы для валидации данных в запросах и ответах.
 """
 from marshmallow import Schema, fields
-from marshmallow.validate import Length
+from marshmallow.validate import Length, Range
 
 
 class Base(Schema):
@@ -14,7 +14,7 @@ class PostLimitsRequestSchema(Base):
     client_id = fields.Int(required=True)
     country = fields.Str(validate=Length(equal=3), required=True)
     currency = fields.Str(validate=Length(equal=3), required=True)
-    max_transfer = fields.Int(required=True)
+    max_transfer = fields.Int(validate=Range(min=0), required=True)
 
 
 class PostLimitsReponseSchema(Base):
@@ -30,7 +30,7 @@ class PutLimitsRequestSchema(Base):
     client_id = fields.Int(required=True)
     country = fields.Str(validate=Length(equal=3), required=True)
     currency = fields.Str(validate=Length(equal=3), required=True)
-    max_transfer = fields.Int(required=True)
+    max_transfer = fields.Int(validate=Range(min=0), required=True)
 
 
 class PutLimitsResponseSchema(Base):

@@ -17,7 +17,7 @@ from app.utils import (select_all,
 
 @docs(tags=['Transactions'],
       summary='Внесение операции в историю')
-@request_schema(TransactionRequestSchema, location='query')
+@request_schema(TransactionRequestSchema)
 @response_schema(TransactionResponseSchema, code=HTTPStatus.CREATED.value)
 async def create_transaction(request):
     data = request['data']
