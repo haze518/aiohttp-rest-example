@@ -12,10 +12,13 @@ wrong_data = {'client_id': 3,
               'max_transfer': 400}
 
 
-@pytest.mark.parametrize(('data', 'expected'), [
-    [correct_data, 200],
-    [wrong_data, 422]
-])
+@pytest.mark.parametrize(
+    ('data', 'expected'),
+    [
+        [correct_data, 200],
+        [wrong_data, 422],
+    ]
+)
 async def test_create_limit(data, expected, api_client):
     """
     Создание лимита

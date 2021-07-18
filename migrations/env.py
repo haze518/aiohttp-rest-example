@@ -6,19 +6,17 @@ from sqlalchemy import pool
 
 from alembic import context
 
-sys.path.append(os.getcwd())
-
-from app.models import db, models
+from app.models import models
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
 
 section = config.config_ini_section
-config.set_section_option(section, "DB_USER", db.DB_USER)
-config.set_section_option(section, "DB_PASS", db.DB_PASSWORD)
-config.set_section_option(section, "DB_NAME", db.DB_NAME)
-config.set_section_option(section, "DB_HOST", db.DB_HOST)
+config.set_section_option(section, "DB_USER", os.environ.get('DB_USER'))
+config.set_section_option(section, "DB_PASS", os.environ.get('DB_PASS'))
+config.set_section_option(section, "DB_NAME", os.environ.get('DB_NAME'))
+config.set_section_option(section, "DB_HOST", os.environ.get('DB_HOST'))
 
 
 # Interpret the config file for Python logging.
