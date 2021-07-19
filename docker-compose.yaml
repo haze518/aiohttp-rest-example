@@ -1,19 +1,18 @@
 version: '3.8'
 
-db-env-variables: &db-env-variables
+x-db-variables: &db-variables
     POSTGRES_USER: user
     POSTGRES_PASSWORD: password
     POSTGRES_DB: transactions_history
 
-app-env-variables: &app-env-variables
-    <<: *db-env-variables
+x-app-variables: &app-variables
+    <<: *db-variables
     POSTGRES_HOST: db
 
 services: 
     app:
-        build:
-            context: .
-            args: *app-env-variables
+        image: transactions-history:latest
+        environment: *app-variables
         volumes:
             - .:/app
         container_name: app
@@ -22,9 +21,10 @@ services:
         ports: 
             - 8080:8080
         restart: always
+        command: bash -c "alembic upgrade head && python run.py --host 0.0.0.0 --port 8080"
     db:
-        container_name: postgresdb # app не видит postgres
+        container_name: postgresdb
         image: postgres:13
         ports:
-            - 5430:5432
-        environment: *db-env-variables
+            - 5432:5432
+        environment: *db-variables

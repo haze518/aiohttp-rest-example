@@ -1,9 +1,11 @@
-from sqlalchemy.sql.expression import literal_column
 from aiohttp import web
-from sqlalchemy import (select,
-                        insert,
-                        update,
-                        delete)
+from sqlalchemy import (
+    select,
+    insert,
+    update,
+    delete,
+)
+from sqlalchemy.sql.expression import literal_column
 
 from app.models.db import database
 

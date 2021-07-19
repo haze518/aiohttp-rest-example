@@ -1,9 +1,6 @@
 import os
 import pytest
 
-# Необходимо создать переменную окружения до импорта db
-os.environ['TESTING'] = 'True'
-
 from alembic import command
 from alembic.config import Config
 from sqlalchemy_utils import create_database, drop_database

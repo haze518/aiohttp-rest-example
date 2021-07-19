@@ -1,12 +1,14 @@
 from aiohttp import web
 
-from app.handlers import (limits_list,
-                          limits_client,
-                          create_limit,
-                          change_limit,
-                          delete_limit,
-                          transaction_list,
-                          create_transaction)
+from app.handlers import (
+    limits_list,
+    limits_client,
+    create_limit,
+    change_limit,
+    delete_limit,
+    transaction_list,
+    create_transaction,
+)
 
 
 def setup_routes(app: web.Application):

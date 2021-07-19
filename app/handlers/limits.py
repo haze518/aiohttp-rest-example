@@ -1,28 +1,29 @@
 from aiohttp import web
+from aiohttp_apispec import (
+    request_schema,
+    docs,
+    response_schema,
+)
 from http import HTTPStatus
-from aiohttp_apispec import (request_schema,
-                             docs,
-                             response_schema)
 
 from app.models.models import Limits
-from app.schemas import (LimitsResponseSchema,
-                         PostLimitsRequestSchema,
-                         PostLimitsReponseSchema,
-                         PutLimitsRequestSchema,
-                         PutLimitsResponseSchema,
-                         DeleteLimitsResponseSchema)
-from app.utils import (select_all,
-                       check_data_exists,
-                       create_new_object,
-                       update_existing_object,
-                       delete_existing_object,
-                       unpack_object_data,
-                       check_not_found)
-
-"""
-Тесты на POST не проходят под location='query'?
-пришлось убрать это
-"""
+from app.schemas import (
+    LimitsResponseSchema,
+    PostLimitsRequestSchema,
+    PostLimitsReponseSchema,
+    PutLimitsRequestSchema,
+    PutLimitsResponseSchema,
+    DeleteLimitsResponseSchema,
+)
+from app.utils import (
+    select_all,
+    check_data_exists,
+    create_new_object,
+    update_existing_object,
+    delete_existing_object,
+    unpack_object_data,
+    check_not_found,
+)
 
 
 @docs(tags=['Limits'],
