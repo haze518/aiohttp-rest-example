@@ -29,7 +29,7 @@ from app.utils import (
 @docs(tags=['Limits'],
       summary='Возвратить все данные')
 @response_schema(LimitsResponseSchema, code=HTTPStatus.OK.value)
-async def limits_list(request):
+async def limits_list(request: web.Request) -> web.Response:
     rows = await select_all(Limits)
     schema = LimitsResponseSchema(many=True)
     limit_json = schema.dump(rows)
@@ -39,7 +39,7 @@ async def limits_list(request):
 @docs(tags=['Limits'],
       summary='Возвратить данные по id клиенту')
 @response_schema(LimitsResponseSchema, code=HTTPStatus.OK.value)
-async def limits_client(request):
+async def limits_client(request: web.Request) -> web.Response:
     id_ = int(request.match_info.get('id'))
     result = await check_not_found(Limits, id_)
     schema = LimitsResponseSchema()
@@ -51,8 +51,9 @@ async def limits_client(request):
       summary='Отправить данные')
 @request_schema(PostLimitsRequestSchema)
 @response_schema(PostLimitsReponseSchema, code=HTTPStatus.CREATED.value)
-async def create_limit(request):
+async def create_limit(request: web.Request) -> web.Response:
     data = request['data']
+    print(type(data))
     result = await check_data_exists(Limits, data)
     if result is not None:
         raise web.HTTPBadRequest()
@@ -65,7 +66,7 @@ async def create_limit(request):
       summary='Изменить существующую запись')
 @request_schema(PutLimitsRequestSchema)
 @response_schema(PutLimitsResponseSchema, code=HTTPStatus.OK.value)
-async def change_limit(request):
+async def change_limit(request: web.Request) -> web.Response:
     data = request['data']
     await check_not_found(Limits, data['id'])
     post = await update_existing_object(Limits, data)
@@ -76,7 +77,7 @@ async def change_limit(request):
 @docs(tags=['Limits'],
       summary='Удалить запись по id')
 @response_schema(DeleteLimitsResponseSchema, code=HTTPStatus.NO_CONTENT.value)
-async def delete_limit(request):
+async def delete_limit(request: web.Request) -> web.Response:
     id_ = int(request.match_info.get('id'))
     await check_not_found(Limits, id_)
     await delete_existing_object(Limits, id_)

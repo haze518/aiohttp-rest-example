@@ -9,7 +9,7 @@ from app.routes import setup_routes
 from app.models.db import database
 
 
-def create_app():
+def create_app() -> web.Application:
     app = web.Application()
     setup_routes(app)
     app.on_startup.append(startup)
@@ -19,9 +19,9 @@ def create_app():
     return app
 
 
-async def startup(app):
+async def startup(app: web.Application) -> None:
     await database.connect()
 
 
-async def shutdown(app):
+async def shutdown(app: web.Application) -> None:
     await database.disconnect()

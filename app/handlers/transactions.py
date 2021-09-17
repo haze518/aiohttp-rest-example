@@ -27,7 +27,7 @@ from app.utils import (
       summary='Внесение операции в историю')
 @request_schema(TransactionRequestSchema)
 @response_schema(TransactionResponseSchema, code=HTTPStatus.CREATED.value)
-async def create_transaction(request):
+async def create_transaction(request: web.Request) -> web.Response:
     data = request['data']
     limit = await get_new_limit_data(Limits, data)
     data['date'] = datetime.today().replace(microsecond=0)
@@ -41,7 +41,7 @@ async def create_transaction(request):
 @docs(tags=['Transactions'],
       summary='Возвратить все данные')
 @response_schema(TransactionResponseSchema, code=HTTPStatus.OK.value)
-async def transaction_list(request):
+async def transaction_list(request: web.Request) -> web.Response:
     rows = await select_all(TransactionHistory)
     schema = TransactionResponseSchema(many=True)
     limit_json = schema.dump(rows)

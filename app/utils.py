@@ -1,23 +1,27 @@
+from typing import List, Optional
+
 from aiohttp import web
+from databases.backends.postgres import Record
 from sqlalchemy import (
     select,
     insert,
     update,
     delete,
 )
+from sqlalchemy.ext.declarative import DeclarativeMeta
 from sqlalchemy.sql.expression import literal_column
 
 from app.models.db import database
 
 
-async def select_all(table):
+async def select_all(table: DeclarativeMeta) -> List[Record]:
     query = (
         select([table])
     )
     return await database.fetch_all(query)
 
 
-async def select_by_id(table, id_):
+async def select_by_id(table: DeclarativeMeta, id_) -> Optional[Record]:
     query = (
         select([table])
         .where(table.id == id_)
@@ -25,7 +29,7 @@ async def select_by_id(table, id_):
     return await database.fetch_one(query)
 
 
-async def check_data_exists(table, data):
+async def check_data_exists(table: DeclarativeMeta, data: dict) -> Optional[Record]:
     query = (
         select()
         .select_from(table)
@@ -36,7 +40,7 @@ async def check_data_exists(table, data):
     return await database.fetch_one(query)
 
 
-async def create_new_object(table, data):
+async def create_new_object(table: DeclarativeMeta, data: dict) -> Optional[Record]:
     new_data = get_table_attrs(table, data)
     query = (
         insert(table)
@@ -46,7 +50,7 @@ async def create_new_object(table, data):
     return await database.fetch_one(query)
 
 
-async def update_existing_object(table, data):
+async def update_existing_object(table: DeclarativeMeta, data: dict) -> Optional[Record]:
     new_data = get_table_attrs(table, data)
     query = (
         update(table)
@@ -57,7 +61,7 @@ async def update_existing_object(table, data):
     return await database.fetch_one(query)
 
 
-async def delete_existing_object(table, id_):
+async def delete_existing_object(table: DeclarativeMeta, id_: int) -> Optional[Record]:
     query = (
         delete(table)
         .where(table.id == id_)
@@ -65,7 +69,7 @@ async def delete_existing_object(table, id_):
     await database.fetch_one(query)
 
 
-def get_table_attrs(table, data):
+def get_table_attrs(table: DeclarativeMeta, data: dict) -> dict:
     """
     Возвратить названия столбцов класса sqlalchemy
     """
@@ -74,14 +78,14 @@ def get_table_attrs(table, data):
     return dict((k, v) for k, v in data.items() if k in table_columns)
 
 
-def unpack_object_data(data):
+def unpack_object_data(data: dict) -> dict:
     """
     Распаковка данных из выгруженного с БД объекта
     """
     return dict(zip(data, data.values()))
 
 
-async def check_not_found(table, id_):
+async def check_not_found(table: DeclarativeMeta, id_: int) -> Optional[Record]:
     """
     Проверка, имеется ли объект с таким id в БД
     """
@@ -91,7 +95,7 @@ async def check_not_found(table, id_):
     return result
 
 
-def check_insufficient_funds(limit, data):
+def check_insufficient_funds(limit: int, data: dict) -> None:
     """
     Проверка остатка на балансе
     """
@@ -99,7 +103,7 @@ def check_insufficient_funds(limit, data):
         raise web.HTTPBadRequest(reason='INSUFFICIENT FUNDS')
 
 
-async def update_account_balance(table, limit, data):
+async def update_account_balance(table: DeclarativeMeta, limit: int, data: dict) -> int:
     """
     Обновить баланс счета
     """
@@ -112,7 +116,7 @@ async def update_account_balance(table, limit, data):
     return limit
 
 
-async def get_new_limit_data(table, data):
+async def get_new_limit_data(table: DeclarativeMeta, data: dict) -> int:
     """
     Возвратить значение обновленного лимита
     """
